@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Achievement Controller</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            padding: 20px;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #080808,
+                    #151515,
+                    #080808
+                );
+
+            color: white;
+
+            min-height: 100vh;
+
+        }
+
+
+        .container {
+
+            width: 100%;
+
+            max-width: 500px;
+
+            margin: auto;
+
+        }
+
+
+        h1 {
+
+            text-align: center;
+
+            margin-top: 10px;
+
+            margin-bottom: 10px;
+
+            font-size: 30px;
+
+        }
+
+
+        .subtitle {
+
+            text-align: center;
+
+            opacity: 0.5;
+
+            margin-bottom: 30px;
+
+            font-size: 15px;
+
+        }
+
+
+        .card {
+
+            background:
+                rgba(
+                    30,
+                    30,
+                    30,
+                    0.95
+                );
+
+            padding: 20px;
+
+            border-radius: 18px;
+
+            margin-bottom: 20px;
+
+            box-shadow:
+                0 10px 30px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.4
+                );
+
+        }
+
+
+        label {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-weight: bold;
+
+            font-size: 16px;
+
+        }
+
+
+        input,
+        select {
+
+            width: 100%;
+
+            padding: 15px;
+
+            border: none;
+
+            outline: none;
+
+            border-radius: 10px;
+
+            font-size: 18px;
+
+            margin-bottom: 18px;
+
+            background: #ffffff;
+
+            color: #111;
+
+        }
+
+
+        input:focus,
+        select:focus {
+
+            box-shadow:
+                0 0 0 3px
+                rgba(
+                    255,
+                    215,
+                    0,
+                    0.25
+                );
+
+        }
+
+
+        button {
+
+            width: 100%;
+
+            padding: 18px;
+
+            border: none;
+
+            border-radius: 12px;
+
+            font-size: 19px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.15s,
+                opacity 0.15s;
+
+        }
+
+
+        button:active {
+
+            transform:
+                scale(0.97);
+
+        }
+
+
+        button:hover {
+
+            opacity: 0.9;
+
+        }
+
+
+        /* =========================
+           SEND BUTTON
+        ========================= */
+
+        .send-button {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ffffff,
+                    #dddddd
+                );
+
+            color: #000;
+
+        }
+
+
+        /* =========================
+           STOP BUTTON
+        ========================= */
+
+        .stop-button {
+
+            margin-top: 15px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #e53935,
+                    #b71c1c
+                );
+
+            color: white;
+
+        }
+
+
+        .stop-button:active {
+
+            background:
+                #8e1b1b;
+
+        }
+
+
+        /* =========================
+           ADMIN
+        ========================= */
+
+        .admin-button {
+
+            background: #333;
+
+            color: white;
+
+        }
+
+
+        /* =========================
+           MESSAGES
+        ========================= */
+
+        #message {
+
+            text-align: center;
+
+            margin-top: 18px;
+
+            font-weight: bold;
+
+            min-height: 20px;
+
+        }
+
+
+        #stopMessage {
+
+            text-align: center;
+
+            margin-top: 15px;
+
+            font-weight: bold;
+
+            min-height: 20px;
+
+        }
+
+
+        /* =========================
+           AMOUNT
+        ========================= */
+
+        #amountContainer {
+
+            display: none;
+
+        }
+
+
+        /* =========================
+           CONNECTION STATUS
+        ========================= */
+
+        .connection {
+
+            text-align: center;
+
+            margin-bottom: 20px;
+
+            font-size: 14px;
+
+            opacity: 0.8;
+
+        }
+
+
+        #connectionStatus {
+
+            font-weight: bold;
+
+        }
+
+
+        .connected {
+
+            color: #4caf50;
+
+        }
+
+
+        .disconnected {
+
+            color: #f44336;
+
+        }
+
+
+        /* =========================
+           STOP WARNING
+        ========================= */
+
+        .stop-info {
+
+            margin-top: 12px;
+
+            text-align: center;
+
+            font-size: 13px;
+
+            opacity: 0.45;
+
+            line-height: 1.4;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <h1>
+
+        🏆 Achievement Wall
+
+    </h1>
+
+
+    <div class="subtitle">
+
+        Control the wall from your phone
+
+    </div>
+
+
+    <!-- CONNECTION STATUS -->
+
+    <div class="connection">
+
+        Server:
+
+        <span
+            id="connectionStatus"
+            class="disconnected"
+        >
+
+            Connecting...
+
+        </span>
+
+    </div>
+
+
+    <!-- =========================
+         ACHIEVEMENT CARD
+    ========================= -->
+
+
+    <div class="card">
+
+
+        <!-- AGENT NAME -->
+
+        <label>
+
+            Agent Name
+
+        </label>
+
+
+        <input
+            id="agentName"
+            type="text"
+            placeholder="Example: Haythem"
+            autocomplete="off"
+        >
+
+
+        <!-- ACHIEVEMENT -->
+
+        <label>
+
+            Achievement
+
+        </label>
+
+
+        <select id="achievement">
+
+            <option value="Deposit">
+
+                💰 Deposit
+
+            </option>
+
+
+            <option value="First Time Deposit">
+
+                🏆 First Time Deposit
+
+            </option>
+
+        </select>
+
+
+        <!-- =========================
+             AMOUNT
+        ========================= -->
+
+
+        <div id="amountContainer">
+
+
+            <label>
+
+                Deposit Amount ($)
+
+            </label>
+
+
+            <input
+                id="amount"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Example: 500"
+            >
+
+
+        </div>
+
+
+        <!-- =========================
+             SEND
+        ========================= -->
+
+
+        <button
+            class="send-button"
+            onclick="sendAchievement()"
+        >
+
+            🚀 SEND ACHIEVEMENT
+
+        </button>
+
+
+        <div id="message"></div>
+
+
+        <!-- =========================
+             STOP
+        ========================= -->
+
+
+        <button
+            class="stop-button"
+            onclick="stopCelebration()"
+        >
+
+            🔴 STOP CELEBRATION
+
+        </button>
+
+
+        <div id="stopMessage"></div>
+
+
+        <div class="stop-info">
+
+            Use this button if an achievement was
+            entered incorrectly or you want to
+            immediately stop the current celebration.
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =========================
+         ADMIN
+    ========================= -->
+
+
+    <div class="card">
+
+
+        <button
+            class="admin-button"
+            onclick="openAdmin()"
+        >
+
+            ⚙️ ADMIN SETTINGS
+
+        </button>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================
+     SOCKET.IO
+========================= -->
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-client.js"></script>
+
+
+
+<script>
+    const connectionStatus = document.getElementById('connectionStatus');
+    const achievement = document.getElementById('achievement');
+    const amountContainer = document.getElementById('amountContainer');
+
+    async function ready() {
+        try { await window.awAuthReady; }
+        catch (e) { console.error(e); alert('Supabase connection failed. Check supabase-config.js.'); throw e; }
+    }
+
+    function updateConnection(ok) {
+        if (!connectionStatus) return;
+        connectionStatus.innerText = ok ? 'Connected to cloud' : 'Connecting...';
+        connectionStatus.className = ok ? 'connected' : 'disconnected';
+    }
+
+    function updateAmountVisibility() {
+        amountContainer.style.display = achievement.value === 'Deposit' ? 'block' : 'none';
+    }
+    achievement.addEventListener('change', updateAmountVisibility);
+    updateAmountVisibility();
+
+    async function init() {
+        try {
+            await ready();
+            const channel = await window.awGetChannel();
+            channel.subscribe((status) => updateConnection(status === 'SUBSCRIBED'));
+        } catch (e) { updateConnection(false); console.error(e); }
+    }
+
+    async function sendAchievement() {
+        const name = document.getElementById('agentName').value.trim();
+        const type = achievement.value;
+        const amount = document.getElementById('amount').value;
+        const message = document.getElementById('message');
+        if (!name) { message.innerText = '❌ Please enter the agent name.'; return; }
+        if (type === 'Deposit' && (!amount || Number(amount) <= 0)) { message.innerText = '❌ Please enter the deposit amount.'; return; }
+        try {
+            await ready();
+            const row = { name, achievement: type, amount: type === 'Deposit' ? Number(amount) : 0 };
+            const { data, error } = await window.awSupabase.from('achievements').insert(row).select().single();
+            if (error) throw error;
+            await window.awBroadcast('new_achievement', data);
+            message.innerText = '✅ Achievement sent to the wall!';
+            document.getElementById('agentName').value = '';
+            document.getElementById('amount').value = '';
+            achievement.value = 'Deposit'; updateAmountVisibility();
+            setTimeout(() => message.innerText = '', 2500);
+        } catch (error) { console.error(error); message.innerText = '❌ Could not send. Check Supabase setup.'; }
+    }
+
+    async function stopCelebration() {
+        const stopMessage = document.getElementById('stopMessage');
+        try { await ready(); await window.awBroadcast('stop_celebration', {}); stopMessage.innerText = '🛑 Stop command sent to the wall.'; }
+        catch (e) { console.error(e); stopMessage.innerText = '❌ Could not contact the wall.'; }
+        setTimeout(() => stopMessage.innerText = '', 2500);
+    }
+
+    function openAdmin() { window.location.href = 'admin.html'; }
+
+    document.getElementById('agentName').addEventListener('keydown', e => { if (e.key === 'Enter') sendAchievement(); });
+    document.getElementById('amount').addEventListener('keydown', e => { if (e.key === 'Enter') sendAchievement(); });
+    init();
+</script>
+
+
+</body>
+
+</html>

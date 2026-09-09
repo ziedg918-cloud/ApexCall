@@ -1,0 +1,2285 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Achievement Wall</title>
+
+
+    <style>
+
+        /* ==========================================
+           GENERAL
+        ========================================== */
+
+        * {
+
+            box-sizing: border-box;
+
+        }
+
+
+        html,
+        body {
+
+            width: 100%;
+            height: 100%;
+
+            margin: 0;
+
+            overflow: hidden;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #050505;
+
+            color: white;
+
+        }
+
+
+        /* ==========================================
+           WALL
+        ========================================== */
+
+        #wall {
+
+            position: relative;
+
+            width: 100vw;
+
+            height: 100vh;
+
+            overflow: hidden;
+
+        }
+
+
+        /* ==========================================
+           BACKGROUND
+        ========================================== */
+
+        .background {
+
+            position: absolute;
+
+            inset: 0;
+
+            background:
+
+                radial-gradient(
+                    circle at 20% 20%,
+                    rgba(
+                        255,
+                        215,
+                        0,
+                        0.12
+                    ),
+                    transparent 35%
+                ),
+
+                radial-gradient(
+                    circle at 80% 80%,
+                    rgba(
+                        255,
+                        100,
+                        0,
+                        0.12
+                    ),
+                    transparent 35%
+                ),
+
+                linear-gradient(
+                    135deg,
+                    #050505,
+                    #151515,
+                    #050505
+                );
+
+            animation:
+                backgroundMove
+                10s
+                ease-in-out
+                infinite
+                alternate;
+
+            z-index: 1;
+
+        }
+
+
+        @keyframes backgroundMove {
+
+            from {
+
+                transform:
+                    scale(1);
+
+            }
+
+            to {
+
+                transform:
+                    scale(1.1);
+
+            }
+
+        }
+
+
+        /* ==========================================
+           HISTORY
+        ========================================== */
+
+        #history {
+
+            position: fixed;
+
+            top: 30px;
+
+            left: 30px;
+
+            width: 300px;
+
+            max-height: 82vh;
+
+            overflow: hidden;
+
+            z-index: 150;
+
+            padding: 18px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(
+                    20,
+                    20,
+                    20,
+                    0.25
+                );
+
+            backdrop-filter:
+                blur(8px);
+
+            border:
+                1px solid
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.08
+                );
+
+            transition:
+
+                background
+                0.5s
+                ease,
+
+                opacity
+                0.5s
+                ease,
+
+                transform
+                0.5s
+                ease;
+
+        }
+
+
+        /*
+        During celebration make
+        history more transparent.
+        */
+
+        body.celebrating #history {
+
+            background:
+                rgba(
+                    10,
+                    10,
+                    10,
+                    0.10
+                );
+
+            opacity: 0.45;
+
+            backdrop-filter:
+                blur(4px);
+
+        }
+
+
+        #historyTitle {
+
+            font-size: 20px;
+
+            font-weight: bold;
+
+            margin-bottom: 15px;
+
+            text-align: center;
+
+            letter-spacing: 2px;
+
+            opacity: 0.8;
+
+        }
+
+
+        #historyList {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 8px;
+
+            max-height: calc(82vh - 72px);
+
+            overflow-y: auto;
+
+            padding-right: 4px;
+
+            scrollbar-width: none;
+
+        }
+
+
+        #historyList::-webkit-scrollbar {
+
+            display: none;
+            width: 0;
+
+        }
+
+
+        .history-time {
+
+            font-size: 11px;
+
+            opacity: 0.45;
+
+            margin-top: 6px;
+
+        }
+
+
+        .history-empty {
+
+            text-align: center;
+
+            padding: 18px 8px;
+
+            opacity: 0.45;
+
+            font-size: 13px;
+
+        }
+
+
+        .history-item {
+
+            padding: 12px;
+
+            border-radius: 12px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.06
+                );
+
+            border:
+                1px solid
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.04
+                );
+
+            transition:
+                0.3s ease;
+
+        }
+
+
+        .history-item:first-child {
+
+            background:
+                rgba(
+                    255,
+                    215,
+                    0,
+                    0.10
+                );
+
+            border:
+                1px solid
+                rgba(
+                    255,
+                    215,
+                    0,
+                    0.15
+                );
+
+        }
+
+
+        .history-name {
+
+            font-size: 19px;
+
+            font-weight: bold;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+        }
+
+
+        .history-achievement {
+
+            font-size: 13px;
+
+            opacity: 0.6;
+
+            margin-top: 5px;
+
+        }
+
+
+        .history-amount {
+
+            font-size: 19px;
+
+            font-weight: bold;
+
+            margin-top: 5px;
+
+        }
+
+
+        /* ==========================================
+           WAITING SCREEN
+        ========================================== */
+
+        #waiting {
+
+            position: absolute;
+
+            inset: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: center;
+
+            align-items: center;
+
+            text-align: center;
+
+            z-index: 5;
+
+            padding-left: 320px;
+
+            padding-right: 30px;
+
+        }
+
+
+        .waiting-logo {
+
+            font-size: 120px;
+
+            animation:
+
+                float
+                3s
+                ease-in-out
+                infinite;
+
+            filter:
+                drop-shadow(
+                    0 0 30px
+                    rgba(
+                        255,
+                        215,
+                        0,
+                        0.25
+                    )
+                );
+
+        }
+
+
+        .waiting-title {
+
+            font-size: 60px;
+
+            font-weight: 900;
+
+            letter-spacing: 8px;
+
+            margin-top: 20px;
+
+        }
+
+
+        .waiting-subtitle {
+
+            font-size: 24px;
+
+            opacity: 0.45;
+
+            margin-top: 20px;
+
+        }
+
+
+        @keyframes float {
+
+            0% {
+
+                transform:
+                    translateY(0);
+
+            }
+
+            50% {
+
+                transform:
+                    translateY(-20px);
+
+            }
+
+            100% {
+
+                transform:
+                    translateY(0);
+
+            }
+
+        }
+
+
+        /* ==========================================
+           CELEBRATION
+        ========================================== */
+
+        #celebration {
+
+            position: absolute;
+
+            inset: 0;
+
+            display: none;
+
+            flex-direction: column;
+
+            justify-content: center;
+
+            align-items: center;
+
+            text-align: center;
+
+            z-index: 10;
+
+            padding-left: 320px;
+
+            padding-right: 30px;
+
+        }
+
+
+        #icon {
+
+            font-size: 140px;
+
+            animation:
+
+                iconEnter
+                0.8s
+                cubic-bezier(
+                    .17,
+                    .67,
+                    .32,
+                    1.3
+                );
+
+            filter:
+                drop-shadow(
+                    0 0 35px
+                    rgba(
+                        255,
+                        215,
+                        0,
+                        0.30
+                    )
+                );
+
+        }
+
+
+        @keyframes iconEnter {
+
+            0% {
+
+                transform:
+                    scale(0)
+                    rotate(-30deg);
+
+                opacity: 0;
+
+            }
+
+            70% {
+
+                transform:
+                    scale(1.2)
+                    rotate(10deg);
+
+            }
+
+            100% {
+
+                transform:
+                    scale(1)
+                    rotate(0);
+
+                opacity: 1;
+
+            }
+
+        }
+
+
+        .congratulations {
+
+            font-size: 34px;
+
+            font-weight: bold;
+
+            letter-spacing: 8px;
+
+            margin-top: 10px;
+
+        }
+
+
+        #agent {
+
+            max-width: 75vw;
+
+            font-size: clamp(
+                50px,
+                7vw,
+                100px
+            );
+
+            font-weight: 900;
+
+            text-transform: uppercase;
+
+            margin: 20px 0;
+
+            overflow-wrap: anywhere;
+
+            text-shadow:
+
+                0 0 15px
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.15
+                ),
+
+                0 0 35px
+                rgba(
+                    255,
+                    215,
+                    0,
+                    0.12
+                );
+
+            animation:
+
+                agentEnter
+                1s
+                cubic-bezier(
+                    .17,
+                    .67,
+                    .32,
+                    1.3
+                );
+
+        }
+
+
+        @keyframes agentEnter {
+
+            0% {
+
+                transform:
+                    scale(0.3);
+
+                opacity: 0;
+
+            }
+
+            70% {
+
+                transform:
+                    scale(1.1);
+
+            }
+
+            100% {
+
+                transform:
+                    scale(1);
+
+                opacity: 1;
+
+            }
+
+        }
+
+
+        #achievement {
+
+            font-size: 50px;
+
+            font-weight: bold;
+
+        }
+
+
+        #amount {
+
+            font-size: 55px;
+
+            font-weight: 900;
+
+            margin-top: 15px;
+
+            animation:
+
+                amountEnter
+                0.8s
+                ease;
+
+        }
+
+
+        @keyframes amountEnter {
+
+            0% {
+
+                transform:
+                    scale(0);
+
+                opacity: 0;
+
+            }
+
+            70% {
+
+                transform:
+                    scale(1.2);
+
+            }
+
+            100% {
+
+                transform:
+                    scale(1);
+
+                opacity: 1;
+
+            }
+
+        }
+
+
+        .message {
+
+            margin-top: 30px;
+
+            font-size: 28px;
+
+            opacity: 0.75;
+
+        }
+
+
+        /* ==========================================
+           QUEUE
+        ========================================== */
+
+        #queueIndicator {
+
+            position: fixed;
+
+            top: 20px;
+
+            right: 25px;
+
+            z-index: 200;
+
+            padding: 12px 20px;
+
+            border-radius: 30px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.08
+                );
+
+            backdrop-filter:
+                blur(10px);
+
+            font-size: 18px;
+
+            display: none;
+
+        }
+
+
+        /* ==========================================
+           CONFETTI
+        ========================================== */
+
+        #confettiCanvas {
+
+            position: fixed;
+
+            inset: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            pointer-events: none;
+
+            z-index: 50;
+
+        }
+
+
+        /* ==========================================
+           FLASH
+        ========================================== */
+
+        #flash {
+
+            position: fixed;
+
+            inset: 0;
+
+            background: white;
+
+            opacity: 0;
+
+            pointer-events: none;
+
+            z-index: 100;
+
+        }
+
+
+        .flash {
+
+            animation:
+
+                flashAnimation
+                0.5s
+                ease;
+
+        }
+
+
+        @keyframes flashAnimation {
+
+            0% {
+
+                opacity: 0;
+
+            }
+
+            30% {
+
+                opacity: 0.8;
+
+            }
+
+            100% {
+
+                opacity: 0;
+
+            }
+
+        }
+
+
+        /* ==========================================
+           DEPOSIT
+        ========================================== */
+
+        .deposit-mode #icon {
+
+            animation:
+
+                depositBounce
+                0.8s
+                ease;
+
+        }
+
+
+        @keyframes depositBounce {
+
+            0% {
+
+                transform:
+                    scale(0);
+
+            }
+
+            50% {
+
+                transform:
+                    scale(1.4);
+
+            }
+
+            100% {
+
+                transform:
+                    scale(1);
+
+            }
+
+        }
+
+
+        /* ==========================================
+           FIRST TIME DEPOSIT
+        ========================================== */
+
+        .ftd-mode #icon {
+
+            animation:
+
+                trophySpin
+                1s
+                ease;
+
+        }
+
+
+        @keyframes trophySpin {
+
+            0% {
+
+                transform:
+                    scale(0)
+                    rotate(-180deg);
+
+            }
+
+            70% {
+
+                transform:
+                    scale(1.3)
+                    rotate(20deg);
+
+            }
+
+            100% {
+
+                transform:
+                    scale(1)
+                    rotate(0);
+
+            }
+
+        }
+
+
+        /* ==========================================
+           STOP STATE
+        ========================================== */
+
+        #celebration.stopped {
+
+            animation:
+                stopFade
+                0.25s
+                ease;
+
+        }
+
+
+        @keyframes stopFade {
+
+            from {
+
+                opacity: 1;
+
+                transform:
+                    scale(1);
+
+            }
+
+            to {
+
+                opacity: 0;
+
+                transform:
+                    scale(0.96);
+
+            }
+
+        }
+
+
+        /* ==========================================
+           RESPONSIVE
+        ========================================== */
+
+        @media (
+            max-width: 900px
+        ) {
+
+            #history {
+
+                width: 240px;
+
+                left: 15px;
+
+                top: 15px;
+
+            }
+
+
+            #waiting,
+            #celebration {
+
+                padding-left: 270px;
+
+            }
+
+
+            .waiting-title {
+
+                font-size: 42px;
+
+            }
+
+
+            .waiting-subtitle {
+
+                font-size: 18px;
+
+            }
+
+        }
+
+
+        #soundUnlockBanner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: #ffcc00;
+            color: #1a1a1a;
+            font-weight: 700;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            animation: soundBannerPulse 2s infinite;
+        }
+
+        #soundUnlockBanner.hidden {
+            display: none;
+        }
+
+        @keyframes soundBannerPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<audio
+    id="celebrationStartSound"
+    src="celebration-start.mp3"
+    preload="auto"
+></audio>
+
+<div id="soundUnlockBanner" onclick="unlockCelebrationAudio()">
+    🔊 Click anywhere to enable celebration sound
+</div>
+
+<div id="wall">
+
+
+    <!-- ==========================================
+         BACKGROUND
+    ========================================== -->
+
+    <div class="background"></div>
+
+
+    <!-- ==========================================
+         HISTORY
+    ========================================== -->
+
+    <div id="history">
+
+        <div id="historyTitle">
+            &#127942; ACHIEVEMENTS
+
+            <span id="historyCount" style="display:none;">0</span>
+
+        </div>
+
+
+        <div id="historyList">
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================
+         WAITING
+    ========================================== -->
+
+    <div id="waiting">
+
+        <div class="waiting-logo">
+            &#127942;
+
+        </div>
+
+
+        <div class="waiting-title">
+
+            ACHIEVEMENT WALL
+
+        </div>
+
+
+        <div class="waiting-subtitle">
+
+            Waiting for the next achievement...
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================
+         CELEBRATION
+    ========================================== -->
+
+    <div id="celebration">
+
+
+        <div id="icon">
+            &#128176;
+
+        </div>
+
+
+        <div class="congratulations">
+
+            CONGRATULATIONS!
+
+        </div>
+
+
+        <div id="agent">
+
+        </div>
+
+
+        <div id="achievement">
+
+        </div>
+
+
+        <div id="amount">
+
+        </div>
+
+
+        <div class="message">
+
+            KEEP GOING! &#128170;
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- ==========================================
+     QUEUE
+========================================== -->
+
+<div id="queueIndicator">
+
+    Queue:
+
+    <span id="queueCount">
+
+        0
+
+    </span>
+
+</div>
+
+
+<!-- ==========================================
+     CONFETTI
+========================================== -->
+
+<canvas
+    id="confettiCanvas">
+</canvas>
+
+
+<!-- ==========================================
+     FLASH
+========================================== -->
+
+<div id="flash"></div>
+
+
+
+
+<!-- ==========================================
+     CONFETTI
+========================================== -->
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-client.js"></script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"
+></script>
+
+
+<script>
+
+
+    /* ==========================================
+       CONFIGURATION
+    ========================================== */
+
+    let CONFIG = {
+
+        depositDuration: 8000,
+
+        firstTimeDepositDuration: 12000,
+
+        depositConfetti: true,
+
+        firstTimeDepositConfetti: true,
+
+        depositSound: true,
+
+        firstTimeDepositSound: true,
+
+        confettiInterval: 250
+
+    };
+
+
+/* ==========================================
+   SUPABASE REALTIME + DATA
+========================================== */
+
+async function loadConfiguration() {
+    try {
+        await window.awAuthReady;
+        const { data, error } = await window.awSupabase
+            .from('app_config').select('config').eq('id', 1).single();
+        if (error) throw error;
+        const config = data.config;
+        CONFIG.depositDuration = config.deposit.duration * 1000;
+        CONFIG.firstTimeDepositDuration = config.first_time_deposit.duration * 1000;
+        CONFIG.depositConfetti = config.deposit.confetti;
+        CONFIG.firstTimeDepositConfetti = config.first_time_deposit.confetti;
+        CONFIG.depositSound = config.deposit.sound;
+        CONFIG.firstTimeDepositSound = config.first_time_deposit.sound;
+    } catch (error) { console.error('Could not load configuration:', error); }
+}
+
+async function loadHistory() {
+    try {
+        await window.awAuthReady;
+        const { data, error } = await window.awSupabase
+            .from('achievements').select('*').order('created_at', { ascending: true });
+        if (error) throw error;
+        renderHistory(data || []);
+    } catch (error) { console.error('Could not load history:', error); }
+}
+
+async function setupRealtime() {
+    try {
+        await window.awSubscribe({
+            new_achievement: ({ payload }) => {
+                try {
+                    const data = payload?.payload || payload;
+                    if (!data || typeof data !== 'object') return;
+                    if (data.id && achievementQueue.some(item => item.id === data.id)) return;
+                    achievementQueue.push(data);
+                    updateQueueIndicator();
+                    loadHistory().catch(error => console.error('Could not refresh history:', error));
+                    if (!celebrationRunning) playNextAchievement();
+                } catch (error) {
+                    console.error('Could not queue achievement:', error);
+                }
+            },
+            stop_celebration: () => stopCurrentCelebration(),
+            config_updated: ({ payload }) => {
+                const config = payload?.config || payload;
+                if (!config?.deposit || !config?.first_time_deposit) return;
+                CONFIG.depositDuration = config.deposit.duration * 1000;
+                CONFIG.firstTimeDepositDuration = config.first_time_deposit.duration * 1000;
+                CONFIG.depositConfetti = config.deposit.confetti;
+                CONFIG.firstTimeDepositConfetti = config.first_time_deposit.confetti;
+                CONFIG.depositSound = config.deposit.sound;
+                CONFIG.firstTimeDepositSound = config.first_time_deposit.sound;
+            },
+            history_updated: () => { loadHistory(); }
+        }, (status) => { console.log('Realtime:', status); });
+    } catch (error) {
+        console.error('Realtime setup failed:', error);
+    }
+}
+
+    /* ==========================================
+       QUEUE
+    ========================================== */
+
+    let achievementQueue = [];
+
+    let celebrationRunning = false;
+
+    let celebrationTimer = null;
+
+    let confettiTimer = null;
+
+    /* ==========================================
+       RENDER HISTORY
+    ========================================== */
+
+    function renderHistory(achievements) {
+
+        const historyList = document.getElementById("historyList");
+        const historyCount = document.getElementById("historyCount");
+
+        historyList.innerHTML = "";
+
+        const items = Array.isArray(achievements) ? achievements.slice().reverse() : [];
+
+        historyCount.textContent = items.length;
+
+        if (items.length === 0) {
+            historyList.innerHTML = '<div class="history-empty">No achievements yet</div>';
+            return;
+        }
+
+        items.forEach(function(data) {
+            const item = document.createElement("div");
+            item.className = "history-item";
+
+            let amountHTML = "";
+            if (Number(data.amount) > 0) {
+                amountHTML = `<div class="history-amount">$${Number(data.amount).toLocaleString("en-US")}</div>`;
+            }
+
+            let timeHTML = "";
+            if (data.created_at) {
+                const date = new Date(data.created_at);
+                if (!Number.isNaN(date.getTime())) {
+                    timeHTML = `<div class="history-time">${date.toLocaleString([], { dateStyle: "short", timeStyle: "short" })}</div>`;
+                }
+            }
+
+            item.innerHTML = `
+                <div class="history-name">${escapeHTML(data.name || "Unknown")}</div>
+                <div class="history-achievement">${escapeHTML(data.achievement || "Achievement")}</div>
+                ${amountHTML}
+                ${timeHTML}
+            `;
+
+            historyList.appendChild(item);
+        });
+    }
+
+
+    /* ==========================================
+       PLAY NEXT ACHIEVEMENT
+    ========================================== */
+
+    function playNextAchievement() {
+
+
+        /*
+        Nothing in queue
+        */
+
+        if (
+
+            achievementQueue.length
+            === 0
+
+        ) {
+
+            celebrationRunning =
+                false;
+
+
+            updateQueueIndicator();
+
+
+            document.body.classList.remove(
+                "celebrating"
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        Mark as running
+        */
+
+        celebrationRunning =
+            true;
+
+
+        document.body.classList.add(
+            "celebrating"
+        );
+
+
+        /*
+        Get first achievement
+        */
+
+        const data =
+            achievementQueue.shift();
+
+
+        updateQueueIndicator();
+
+
+        /*
+        Start celebration
+        */
+
+        startCelebration(
+            data
+        );
+
+    }
+
+
+    /* ==========================================
+       START CELEBRATION
+    ========================================== */
+
+    /*
+    We deliberately do NOT reuse the same <audio> element for every
+    celebration. Reusing one element and doing
+    "currentTime = 0; play()" back-to-back can get the second (or
+    third...) call silently interrupted/aborted by the browser if the
+    previous play() hadn't fully settled yet, which is why sound could
+    stop working after the first celebration. Instead we clone a fresh
+    playable copy from the base element every time, so each play is
+    fully independent.
+    */
+
+    function playCelebrationStartSound(isFTD) {
+
+        /*
+        Respect the enable/disable sound settings
+        */
+
+        const soundEnabled = isFTD
+            ? CONFIG.firstTimeDepositSound
+            : CONFIG.depositSound;
+
+        if (soundEnabled === false) {
+            return;
+        }
+
+        const baseSound = document.getElementById(
+            "celebrationStartSound"
+        );
+
+        if (!baseSound) {
+            return;
+        }
+
+        const sound = baseSound.cloneNode(true);
+        sound.volume = baseSound.volume;
+
+        const playback = sound.play();
+
+        if (playback && typeof playback.then === "function") {
+            playback.then(function () {
+                hideSoundUnlockBanner();
+            }).catch(function (error) {
+                console.warn(
+                    "Celebration sound could not play. The browser may require interaction first.",
+                    error
+                );
+            });
+        }
+
+        /*
+        Clean up the clone once it's done so we don't leak elements
+        */
+
+        sound.addEventListener("ended", function () {
+            sound.remove();
+        });
+
+    }
+
+
+    function startCelebration(
+        data
+    ) {
+
+
+        /*
+        Stop previous timers
+        */
+
+        clearTimeout(
+            celebrationTimer
+        );
+
+
+        clearInterval(
+            confettiTimer
+        );
+
+
+        const waiting =
+            document.getElementById(
+                "waiting"
+            );
+
+
+        const celebration =
+            document.getElementById(
+                "celebration"
+            );
+
+
+        const agent =
+            document.getElementById(
+                "agent"
+            );
+
+
+        const achievement =
+            document.getElementById(
+                "achievement"
+            );
+
+
+        const amountElement =
+            document.getElementById(
+                "amount"
+            );
+
+
+        const icon =
+            document.getElementById(
+                "icon"
+            );
+
+
+        /*
+        Remove old modes
+        */
+
+        celebration.classList.remove(
+            "deposit-mode"
+        );
+
+
+        celebration.classList.remove(
+            "ftd-mode"
+        );
+
+
+        celebration.classList.remove(
+            "stopped"
+        );
+
+
+        /*
+        Determine FTD
+        */
+
+        const isFTD =
+
+            data.achievement
+            ===
+            "First Time Deposit";
+
+
+        /*
+        Agent
+        */
+
+        agent.innerText =
+            data.name;
+
+
+        /*
+        Achievement
+        */
+
+        achievement.innerText =
+            data.achievement;
+
+
+        /*
+        Amount
+        */
+
+        if (
+
+            Number(data.amount) > 0
+
+        ) {
+
+            amountElement.innerText =
+
+                "$" +
+
+                Number(
+                    data.amount
+                ).toLocaleString(
+                    "en-US"
+                );
+
+        }
+
+        else {
+
+            amountElement.innerText =
+                "";
+
+        }
+
+
+        /*
+        FTD
+        */
+
+        if (isFTD) {
+
+            icon.innerText =
+                "\uD83D\uDCB0";
+
+
+            celebration.classList.add(
+                "ftd-mode"
+            );
+
+        }
+
+
+        /*
+        Deposit
+        */
+
+        else {
+
+            icon.innerText =
+                "\uD83D\uDCB0";
+
+
+            celebration.classList.add(
+                "deposit-mode"
+            );
+
+        }
+
+
+        /*
+        Show celebration
+        */
+
+        waiting.style.display =
+            "none";
+
+
+        celebration.style.display =
+            "flex";
+
+
+        /*
+        Play the start sound
+        */
+
+        playCelebrationStartSound(isFTD);
+
+
+        /*
+        Flash
+        */
+
+        flashScreen();
+
+
+        /*
+        Confetti
+        */
+
+        const confettiEnabled =
+
+            isFTD
+
+                ? CONFIG.firstTimeDepositConfetti
+
+                : CONFIG.depositConfetti;
+
+
+        if (
+            confettiEnabled
+        ) {
+
+            startConfetti(
+                isFTD
+            );
+
+        }
+
+
+        /*
+        Duration
+        */
+
+        const duration =
+
+            isFTD
+
+                ? CONFIG.firstTimeDepositDuration
+
+                : CONFIG.depositDuration;
+
+
+        /*
+        Finish automatically
+        */
+
+        celebrationTimer =
+
+            setTimeout(
+
+                function() {
+
+
+                    finishCelebration();
+
+
+                },
+
+                duration
+
+            );
+
+    }
+
+
+    /* ==========================================
+       FINISH CELEBRATION
+    ========================================== */
+
+    function finishCelebration() {
+
+
+        /*
+        Stop timer
+        */
+
+        clearTimeout(
+            celebrationTimer
+        );
+
+
+        celebrationTimer =
+            null;
+
+
+        /*
+        Stop confetti
+        */
+
+        clearInterval(
+            confettiTimer
+        );
+
+
+        confettiTimer =
+            null;
+
+
+        /*
+        Elements
+        */
+
+        const celebration =
+            document.getElementById(
+                "celebration"
+            );
+
+
+        const waiting =
+            document.getElementById(
+                "waiting"
+            );
+
+
+        /*
+        Hide celebration
+        */
+
+        celebration.style.display =
+            "none";
+
+
+        /*
+        Show waiting
+        */
+
+        waiting.style.display =
+            "flex";
+
+
+        /*
+        Remove celebrating state
+        */
+
+        document.body.classList.remove(
+            "celebrating"
+        );
+
+
+        /*
+        Continue queue
+        */
+
+        celebrationRunning =
+            false;
+
+
+        setTimeout(
+
+            function() {
+
+                playNextAchievement();
+
+            },
+
+            500
+
+        );
+
+    }
+
+
+    /* ==========================================
+       STOP CURRENT CELEBRATION
+    ========================================== */
+
+    function stopCurrentCelebration() {
+
+
+        console.log(
+            "Stopping current celebration..."
+        );
+
+
+        /*
+        Stop celebration timer
+        */
+
+        clearTimeout(
+            celebrationTimer
+        );
+
+
+        celebrationTimer =
+            null;
+
+
+        /*
+        Stop confetti
+        */
+
+        clearInterval(
+            confettiTimer
+        );
+
+
+        confettiTimer =
+            null;
+
+
+        /*
+        Elements
+        */
+
+        const celebration =
+            document.getElementById(
+                "celebration"
+            );
+
+
+        const waiting =
+            document.getElementById(
+                "waiting"
+            );
+
+
+        const agent =
+            document.getElementById(
+                "agent"
+            );
+
+
+        const achievement =
+            document.getElementById(
+                "achievement"
+            );
+
+
+        const amount =
+            document.getElementById(
+                "amount"
+            );
+
+
+        const icon =
+            document.getElementById(
+                "icon"
+            );
+
+
+        /*
+        Hide celebration
+        */
+
+        celebration.style.display =
+            "none";
+
+
+        /*
+        Show waiting screen
+        */
+
+        waiting.style.display =
+            "flex";
+
+
+        /*
+        Clear displayed information
+        */
+
+        agent.innerText =
+            "";
+
+
+        achievement.innerText =
+            "";
+
+
+        amount.innerText =
+            "";
+
+
+        /*
+        Reset icon
+        */
+
+        icon.innerText =
+            "\uD83D\uDCB0";
+
+
+        /*
+        Remove modes
+        */
+
+        celebration.classList.remove(
+            "deposit-mode"
+        );
+
+
+        celebration.classList.remove(
+            "ftd-mode"
+        );
+
+
+        celebration.classList.remove(
+            "stopped"
+        );
+
+
+        /*
+        VERY IMPORTANT:
+        Clear the waiting queue
+        */
+
+        achievementQueue = [];
+
+
+        updateQueueIndicator();
+
+
+        /*
+        Stop running state
+        */
+
+        celebrationRunning =
+            false;
+
+
+        /*
+        Remove transparency mode
+        */
+
+        document.body.classList.remove(
+            "celebrating"
+        );
+
+
+        console.log(
+            "Celebration completely stopped."
+        );
+
+    }
+
+
+    /* ==========================================
+       QUEUE INDICATOR
+    ========================================== */
+
+    function updateQueueIndicator() {
+
+
+        const indicator =
+            document.getElementById(
+                "queueIndicator"
+            );
+
+
+        const count =
+            document.getElementById(
+                "queueCount"
+            );
+
+
+        const number =
+            achievementQueue.length;
+
+
+        count.innerText =
+            number;
+
+
+        if (
+            number > 0
+        ) {
+
+            indicator.style.display =
+                "block";
+
+        }
+
+        else {
+
+            indicator.style.display =
+                "none";
+
+        }
+
+    }
+
+
+    /* ==========================================
+       FLASH
+    ========================================== */
+
+    function flashScreen() {
+
+
+        const flash =
+            document.getElementById(
+                "flash"
+            );
+
+
+        flash.classList.remove(
+            "flash"
+        );
+
+
+        void flash.offsetWidth;
+
+
+        flash.classList.add(
+            "flash"
+        );
+
+    }
+
+
+    /* ==========================================
+       CONFETTI
+    ========================================== */
+
+    function startConfetti(
+        isFTD
+    ) {
+
+
+        launchConfetti(
+            isFTD
+        );
+
+
+        confettiTimer =
+
+            setInterval(
+
+                function() {
+
+                    launchConfetti(
+                        isFTD
+                    );
+
+                },
+
+                CONFIG.confettiInterval
+
+            );
+
+    }
+
+
+    /* ==========================================
+       CONFETTI BURST
+    ========================================== */
+
+    function launchConfetti(
+        isFTD
+    ) {
+
+
+        if (
+
+            typeof confetti
+            !== "function"
+
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        First Time Deposit
+        */
+
+        if (isFTD) {
+
+
+            confetti({
+
+                particleCount: 100,
+
+                spread: 100,
+
+                startVelocity: 50,
+
+                origin: {
+
+                    x: 0.5,
+
+                    y: 0.65
+
+                }
+
+            });
+
+        }
+
+
+        /*
+        Normal Deposit
+        */
+
+        else {
+
+
+            confetti({
+
+                particleCount: 50,
+
+                spread: 80,
+
+                startVelocity: 40,
+
+                origin: {
+
+                    x: Math.random(),
+
+                    y: 0.6
+
+                }
+
+            });
+
+        }
+
+    }
+
+
+    /* ==========================================
+       SECURITY / HTML ESCAPE
+    ========================================== */
+
+    function escapeHTML(
+        text
+    ) {
+
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.textContent =
+            text ?? "";
+
+
+        return div.innerHTML;
+
+    }
+
+
+    /* ==========================================
+       START
+    ========================================== */
+
+    /*
+    Some browsers block ANY audio playback (even later ones triggered
+    from JS/websocket events) until the page has seen at least one
+    real user interaction. Unlock audio on the very first click/tap/
+    key press so celebration sounds are free to play afterward.
+    */
+
+    function hideSoundUnlockBanner() {
+        const banner = document.getElementById("soundUnlockBanner");
+        if (banner) {
+            banner.classList.add("hidden");
+        }
+    }
+
+    function unlockCelebrationAudio() {
+
+        const baseSound = document.getElementById(
+            "celebrationStartSound"
+        );
+
+        if (baseSound) {
+            baseSound.play().then(function () {
+                baseSound.pause();
+                baseSound.currentTime = 0;
+                hideSoundUnlockBanner();
+            }).catch(function () {});
+        }
+
+        document.removeEventListener("click", unlockCelebrationAudio);
+        document.removeEventListener("keydown", unlockCelebrationAudio);
+        document.removeEventListener("touchstart", unlockCelebrationAudio);
+
+    }
+
+    document.addEventListener("click", unlockCelebrationAudio);
+    document.addEventListener("keydown", unlockCelebrationAudio);
+    document.addEventListener("touchstart", unlockCelebrationAudio);
+
+
+    (async function () {
+        await window.awAuthReady;
+        await loadConfiguration();
+        await loadHistory();
+        await setupRealtime();
+    })();
+
+
+</script>
+
+
+</body>
+
+</html>
+
+
+

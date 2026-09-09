@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Achievement Wall Admin
+    </title>
+
+
+    <style>
+
+        * {
+
+            box-sizing: border-box;
+
+        }
+
+
+        body {
+
+            margin: 0;
+
+            padding: 15px;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #111;
+
+            color: white;
+
+        }
+
+
+        .container {
+
+            width: 100%;
+
+            max-width: 600px;
+
+            margin: auto;
+
+        }
+
+
+        h1 {
+
+            text-align: center;
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .card {
+
+            background: #1d1d1d;
+
+            padding: 20px;
+
+            border-radius: 15px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .card h2 {
+
+            margin-top: 0;
+
+        }
+
+
+        label {
+
+            display: block;
+
+            margin-top: 20px;
+
+            margin-bottom: 8px;
+
+            font-weight: bold;
+
+        }
+
+
+        input[type="number"] {
+
+            width: 100%;
+
+            padding: 14px;
+
+            border-radius: 8px;
+
+            border: none;
+
+            font-size: 18px;
+
+        }
+
+
+        .checkbox {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin-top: 15px;
+
+        }
+
+
+        .checkbox label {
+
+            margin: 0;
+
+        }
+
+
+        .checkbox input {
+
+            width: 20px;
+
+            height: 20px;
+
+        }
+
+
+        button {
+
+            border: none;
+
+            border-radius: 10px;
+
+            padding: 12px;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+        }
+
+
+        .save-button {
+
+            width: 100%;
+
+            padding: 18px;
+
+            background: white;
+
+            color: black;
+
+            font-size: 20px;
+
+        }
+
+
+        #message {
+
+            text-align: center;
+
+            margin-top: 20px;
+
+            font-weight: bold;
+
+        }
+
+
+        /* =================================
+           HISTORY
+        ================================= */
+
+
+        .history-title {
+
+            margin-top: 40px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .history-item {
+
+            background: #1d1d1d;
+
+            border-radius: 15px;
+
+            padding: 18px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .history-name {
+
+            font-size: 22px;
+
+            font-weight: bold;
+
+        }
+
+
+        .history-type {
+
+            margin-top: 6px;
+
+            opacity: 0.75;
+
+        }
+
+
+        .history-amount {
+
+            margin-top: 8px;
+
+            font-size: 22px;
+
+            font-weight: bold;
+
+        }
+
+
+        .history-actions {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 15px;
+
+        }
+
+
+        .modify-button {
+
+            flex: 1;
+
+            background: #ffffff;
+
+            color: #000000;
+
+        }
+
+
+        .delete-button {
+
+            flex: 1;
+
+            background: #ff4444;
+
+            color: white;
+
+        }
+
+
+        /* =================================
+           MODIFY FORM
+        ================================= */
+
+
+        #modifyPanel {
+
+            display: none;
+
+        }
+
+
+        #modifyPanel input,
+
+        #modifyPanel select {
+
+            width: 100%;
+
+            padding: 14px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            font-size: 18px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        .modify-save {
+
+            width: 100%;
+
+            background: white;
+
+            color: black;
+
+            margin-top: 10px;
+
+        }
+
+
+        .cancel-button {
+
+            width: 100%;
+
+            background: #333;
+
+            color: white;
+
+            margin-top: 10px;
+
+        }
+
+
+        .empty {
+
+            text-align: center;
+
+            opacity: 0.6;
+
+            padding: 20px;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <h1>
+
+        ⚙️ Achievement Wall Admin
+
+    </h1>
+
+
+    <!-- =================================
+         DEPOSIT SETTINGS
+    ================================== -->
+
+
+    <div class="card">
+
+
+        <h2>
+
+            💰 Deposit
+
+        </h2>
+
+
+        <label>
+
+            Celebration Duration (seconds)
+
+        </label>
+
+
+        <input
+
+            id="depositDuration"
+
+            type="number"
+
+            min="1"
+
+            max="60"
+
+        >
+
+
+        <div class="checkbox">
+
+            <input
+
+                id="depositConfetti"
+
+                type="checkbox"
+
+            >
+
+            <label>
+
+                Confetti
+
+            </label>
+
+        </div>
+
+
+        <div class="checkbox">
+
+            <input
+
+                id="depositSound"
+
+                type="checkbox"
+
+            >
+
+            <label>
+
+                Sound
+
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================
+         FTD SETTINGS
+    ================================== -->
+
+
+    <div class="card">
+
+
+        <h2>
+
+            🏆 First Time Deposit
+
+        </h2>
+
+
+        <label>
+
+            Celebration Duration (seconds)
+
+        </label>
+
+
+        <input
+
+            id="ftdDuration"
+
+            type="number"
+
+            min="1"
+
+            max="60"
+
+        >
+
+
+        <div class="checkbox">
+
+            <input
+
+                id="ftdConfetti"
+
+                type="checkbox"
+
+            >
+
+            <label>
+
+                Confetti
+
+            </label>
+
+        </div>
+
+
+        <div class="checkbox">
+
+            <input
+
+                id="ftdSound"
+
+                type="checkbox"
+
+            >
+
+            <label>
+
+                Sound
+
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <button
+        class="save-button"
+        onclick="saveSettings()"
+    >
+
+        💾 SAVE SETTINGS
+
+    </button>
+
+
+    <div id="message"></div>
+
+
+    <!-- =================================
+         MODIFY PANEL
+    ================================== -->
+
+
+    <div
+        id="modifyPanel"
+        class="card"
+    >
+
+        <h2>
+
+            ✏️ Modify Achievement
+
+        </h2>
+
+
+        <label>
+
+            Agent Name
+
+        </label>
+
+
+        <input
+            id="modifyName"
+            type="text"
+            placeholder="Agent name"
+        >
+
+
+        <label>
+
+            Achievement
+
+        </label>
+
+
+        <select id="modifyType">
+
+
+            <option value="Deposit">
+
+                💰 Deposit
+
+            </option>
+
+
+            <option value="First Time Deposit">
+
+                🏆 First Time Deposit
+
+            </option>
+
+
+        </select>
+
+
+        <label>
+
+            Deposit Amount ($)
+
+        </label>
+
+
+        <input
+            id="modifyAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Amount"
+        >
+
+
+        <button
+            class="modify-save"
+            onclick="saveModification()"
+        >
+
+            💾 SAVE CHANGES
+
+        </button>
+
+
+        <button
+            class="cancel-button"
+            onclick="cancelModification()"
+        >
+
+            CANCEL
+
+        </button>
+
+
+    </div>
+
+
+    <!-- =================================
+         HISTORY
+    ================================== -->
+
+
+    <h2 class="history-title">
+
+        📊 Achievement History
+
+    </h2>
+
+
+    <div id="historyList">
+
+        Loading...
+
+    </div>
+
+
+</div>
+
+
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+
+<script>
+
+
+    const socket = io();
+
+
+    let currentModifyId = null;
+
+
+    // =====================================
+    // LOAD SETTINGS
+    // =====================================
+
+
+    async function loadSettings() {
+
+
+        const response =
+
+            await fetch(
+                "/api/config"
+            );
+
+
+        const config =
+            await response.json();
+
+
+        document.getElementById(
+            "depositDuration"
+        ).value =
+            config.deposit.duration;
+
+
+        document.getElementById(
+            "depositConfetti"
+        ).checked =
+            config.deposit.confetti;
+
+
+        document.getElementById(
+            "depositSound"
+        ).checked =
+            config.deposit.sound;
+
+
+        document.getElementById(
+            "ftdDuration"
+        ).value =
+            config.first_time_deposit.duration;
+
+
+        document.getElementById(
+            "ftdConfetti"
+        ).checked =
+            config.first_time_deposit.confetti;
+
+
+        document.getElementById(
+            "ftdSound"
+        ).checked =
+            config.first_time_deposit.sound;
+
+    }
+
+
+    // =====================================
+    // SAVE SETTINGS
+    // =====================================
+
+
+    async function saveSettings() {
+
+
+        const config = {
+
+
+            deposit: {
+
+                duration:
+
+                    Number(
+                        document.getElementById(
+                            "depositDuration"
+                        ).value
+                    ),
+
+                confetti:
+
+                    document.getElementById(
+                        "depositConfetti"
+                    ).checked,
+
+                sound:
+
+                    document.getElementById(
+                        "depositSound"
+                    ).checked
+
+            },
+
+
+            first_time_deposit: {
+
+                duration:
+
+                    Number(
+                        document.getElementById(
+                            "ftdDuration"
+                        ).value
+                    ),
+
+                confetti:
+
+                    document.getElementById(
+                        "ftdConfetti"
+                    ).checked,
+
+                sound:
+
+                    document.getElementById(
+                        "ftdSound"
+                    ).checked
+
+            }
+
+        };
+
+
+        const response =
+
+            await fetch(
+                "/api/config",
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify(
+                            config
+                        )
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (
+            result.success
+        ) {
+
+
+            document.getElementById(
+                "message"
+            ).innerText =
+
+                "✅ Settings saved successfully!";
+
+
+        }
+
+    }
+
+
+    // =====================================
+    // LOAD HISTORY
+    // =====================================
+
+
+    async function loadHistory() {
+
+
+        try {
+
+
+            const response =
+
+                await fetch(
+                    "/api/achievements"
+                );
+
+
+            const achievements =
+
+                await response.json();
+
+
+            displayHistory(
+                achievements
+            );
+
+
+        }
+
+        catch (error) {
+
+
+            document.getElementById(
+                "historyList"
+            ).innerHTML =
+
+                "<div class='empty'>Unable to load history.</div>";
+
+        }
+
+    }
+
+
+    // =====================================
+    // DISPLAY HISTORY
+    // =====================================
+
+
+    function displayHistory(
+        achievements
+    ) {
+
+
+        const list =
+
+            document.getElementById(
+                "historyList"
+            );
+
+
+        list.innerHTML = "";
+
+
+        if (
+            achievements.length === 0
+        ) {
+
+
+            list.innerHTML =
+
+                "<div class='empty'>No achievements yet.</div>";
+
+            return;
+
+        }
+
+
+        achievements
+            .slice()
+            .reverse()
+            .forEach(
+                achievement => {
+
+
+                    const item =
+
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    item.className =
+                        "history-item";
+
+
+                    let amountHTML = "";
+
+
+                    if (
+                        achievement.amount
+                        &&
+                        Number(
+                            achievement.amount
+                        ) > 0
+                    ) {
+
+
+                        amountHTML =
+
+                            `
+
+                            <div
+                                class="history-amount"
+                            >
+
+                                💵
+                                $${Number(
+                                    achievement.amount
+                                ).toLocaleString(
+                                    "en-US"
+                                )}
+
+                            </div>
+
+                            `;
+
+                    }
+
+
+                    item.innerHTML =
+
+                        `
+
+                        <div
+                            class="history-name"
+                        >
+
+                            ${escapeHTML(
+                                achievement.name
+                            )}
+
+                        </div>
+
+
+                        <div
+                            class="history-type"
+                        >
+
+                            ${escapeHTML(
+                                achievement.achievement
+                            )}
+
+                        </div>
+
+
+                        ${amountHTML}
+
+
+                        <div
+                            class="history-actions"
+                        >
+
+
+                            <button
+
+                                class="modify-button"
+
+                                onclick="openModify(
+                                    '${achievement.id}'
+                                )"
+
+                            >
+
+                                ✏️ Modify
+
+                            </button>
+
+
+                            <button
+
+                                class="delete-button"
+
+                                onclick="deleteAchievement(
+                                    '${achievement.id}'
+                                )"
+
+                            >
+
+                                🗑️ Delete
+
+                            </button>
+
+
+                        </div>
+
+                        `;
+
+
+                    list.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+    }
+
+
+    // =====================================
+    // MODIFY
+    // =====================================
+
+
+    function openModify(
+        id
+    ) {
+
+
+        fetch(
+            "/api/achievements"
+        )
+
+        .then(
+            response =>
+                response.json()
+        )
+
+        .then(
+            achievements => {
+
+
+                const achievement =
+
+                    achievements.find(
+                        item =>
+                            item.id === id
+                    );
+
+
+                if (!achievement) {
+
+                    alert(
+                        "Achievement not found."
+                    );
+
+                    return;
+
+                }
+
+
+                currentModifyId =
+                    id;
+
+
+                document.getElementById(
+                    "modifyName"
+                ).value =
+                    achievement.name;
+
+
+                document.getElementById(
+                    "modifyType"
+                ).value =
+                    achievement.achievement;
+
+
+                document.getElementById(
+                    "modifyAmount"
+                ).value =
+                    achievement.amount || 0;
+
+
+                document.getElementById(
+                    "modifyPanel"
+                ).style.display =
+                    "block";
+
+
+                document.getElementById(
+                    "modifyPanel"
+                ).scrollIntoView({
+                    behavior: "smooth"
+                });
+
+            }
+        );
+
+    }
+
+
+    // =====================================
+    // SAVE MODIFICATION
+    // =====================================
+
+
+    function saveModification() {
+
+
+        if (
+            !currentModifyId
+        ) {
+
+            return;
+
+        }
+
+
+        const name =
+
+            document.getElementById(
+                "modifyName"
+            ).value.trim();
+
+
+        const achievement =
+
+            document.getElementById(
+                "modifyType"
+            ).value;
+
+
+        const amount =
+
+            Number(
+                document.getElementById(
+                    "modifyAmount"
+                ).value
+            ) || 0;
+
+
+        if (!name) {
+
+            alert(
+                "Please enter the agent name."
+            );
+
+            return;
+
+        }
+
+
+        socket.emit(
+            "modify_achievement",
+            {
+
+                id:
+                    currentModifyId,
+
+                name:
+                    name,
+
+                achievement:
+                    achievement,
+
+                amount:
+                    amount
+
+            }
+        );
+
+
+        currentModifyId =
+            null;
+
+
+        document.getElementById(
+            "modifyPanel"
+        ).style.display =
+            "none";
+
+    }
+
+
+    // =====================================
+    // CANCEL MODIFICATION
+    // =====================================
+
+
+    function cancelModification() {
+
+
+        currentModifyId =
+            null;
+
+
+        document.getElementById(
+            "modifyPanel"
+        ).style.display =
+            "none";
+
+    }
+
+
+    // =====================================
+    // DELETE
+    // =====================================
+
+
+    function deleteAchievement(
+        id
+    ) {
+
+
+        const confirmation =
+
+            confirm(
+                "Are you sure you want to delete this achievement?"
+            );
+
+
+        if (
+            !confirmation
+        ) {
+
+            return;
+
+        }
+
+
+        socket.emit(
+            "delete_achievement",
+            {
+
+                id:
+                    id
+
+            }
+        );
+
+    }
+
+
+    // =====================================
+    // REAL-TIME UPDATE
+    // =====================================
+
+
+    socket.on(
+        "history_updated",
+
+        function(
+            achievements
+        ) {
+
+
+            displayHistory(
+                achievements
+            );
+
+
+        }
+    );
+
+
+    // =====================================
+    // SECURITY
+    // =====================================
+
+
+    function escapeHTML(
+        text
+    ) {
+
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.textContent =
+            text;
+
+
+        return div.innerHTML;
+
+    }
+
+
+    // =====================================
+    // START
+    // =====================================
+
+
+    loadSettings();
+
+    loadHistory();
+
+
+</script>
+
+
+</body>
+
+</html>

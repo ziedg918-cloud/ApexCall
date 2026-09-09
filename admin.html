@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Achievement Wall Admin
+    </title>
+
+
+    <style>
+
+        * {
+
+            box-sizing: border-box;
+
+        }
+
+
+        body {
+
+            margin: 0;
+
+            padding: 15px;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #111;
+
+            color: white;
+
+        }
+
+
+        .container {
+
+            width: 100%;
+
+            max-width: 600px;
+
+            margin: auto;
+
+        }
+
+
+        h1 {
+
+            text-align: center;
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .card {
+
+            background: #1d1d1d;
+
+            padding: 20px;
+
+            border-radius: 15px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .card h2 {
+
+            margin-top: 0;
+
+        }
+
+
+        label {
+
+            display: block;
+
+            margin-top: 20px;
+
+            margin-bottom: 8px;
+
+            font-weight: bold;
+
+        }
+
+
+        input[type="number"] {
+
+            width: 100%;
+
+            padding: 14px;
+
+            border-radius: 8px;
+
+            border: none;
+
+            font-size: 18px;
+
+        }
+
+
+        .checkbox {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin-top: 15px;
+
+        }
+
+
+        .checkbox label {
+
+            margin: 0;
+
+        }
+
+
+        .checkbox input {
+
+            width: 20px;
+
+            height: 20px;
+
+        }
+
+
+        button {
+
+            border: none;
+
+            border-radius: 10px;
+
+            padding: 12px;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+        }
+
+
+        .save-button {
+
+            width: 100%;
+
+            padding: 18px;
+
+            background: white;
+
+            color: black;
+
+            font-size: 20px;
+
+        }
+
+
+        #message {
+
+            text-align: center;
+
+            margin-top: 20px;
+
+            font-weight: bold;
+
+        }
+
+
+        /* =================================
+           HISTORY
+        ================================= */
+
+
+        .history-title {
+
+            margin-top: 40px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .history-item {
+
+            background: #1d1d1d;
+
+            border-radius: 15px;
+
+            padding: 18px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .history-name {
+
+            font-size: 22px;
+
+            font-weight: bold;
+
+        }
+
+
+        .history-type {
+
+            margin-top: 6px;
+
+            opacity: 0.75;
+
+        }
+
+
+        .history-amount {
+
+            margin-top: 8px;
+
+            font-size: 22px;
+
+            font-weight: bold;
+
+        }
+
+
+        .history-actions {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 15px;
+
+        }
+
+
+        .modify-button {
+
+            flex: 1;
+
+            background: #ffffff;
+
+            color: #000000;
+
+        }
+
+
+        .delete-button {
+
+            flex: 1;
+
+            background: #ff4444;
+
+            color: white;
+
+        }
+
+
+        /* =================================
+           MODIFY FORM
+        ================================= */
+
+
+        #modifyPanel {
+
+            display: none;
+
+        }
+
+
+        #modifyPanel input,
+
+        #modifyPanel select {
+
+            width: 100%;
+
+            padding: 14px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            font-size: 18px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        .modify-save {
+
+            width: 100%;
+
+            background: white;
+
+            color: black;
+
+            margin-top: 10px;
+
+        }
+
+
+        .cancel-button {
+
+            width: 100%;
+
+            background: #333;
+
+            color: white;
+
+            margin-top: 10px;
+
+        }
+
+
+        .empty {
+
+            text-align: center;
+
+            opacity: 0.6;
+
+            padding: 20px;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <h1>
+
+        ⚙️ Achievement Wall Admin
+
+    </h1>
+
+
+    <!-- =================================
+         DEPOSIT SETTINGS
+    ================================== -->
+
+
+    <div class="card">
+
+
+        <h2>
+
+            💰 Deposit
+
+        </h2>
+
+
+        <label>
+
+            Celebration Duration (seconds)
+
+        </label>
+
+
+        <input
+
+            id="depositDuration"
+
+            type="number"
+
+            min="1"
+
+            max="60"
+
+        >
+
+
+        <div class="checkbox">
+
+            <input
+
+                id="depositConfetti"
+
+                type="checkbox"
+
+            >
+
+            <label>
+
+                Confetti
+
+            </label>
+
+        </div>
+
+
+        <div class="checkbox">
+
+            <input
+
+                id="depositSound"
+
+                type="checkbox"
+
+            >
+
+            <label>
+
+                Sound
+
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================
+         FTD SETTINGS
+    ================================== -->
+
+
+    <div class="card">
+
+
+        <h2>
+
+            🏆 First Time Deposit
+
+        </h2>
+
+
+        <label>
+
+            Celebration Duration (seconds)
+
+        </label>
+
+
+        <input
+
+            id="ftdDuration"
+
+            type="number"
+
+            min="1"
+
+            max="60"
+
+        >
+
+
+        <div class="checkbox">
+
+            <input
+
+                id="ftdConfetti"
+
+                type="checkbox"
+
+            >
+
+            <label>
+
+                Confetti
+
+            </label>
+
+        </div>
+
+
+        <div class="checkbox">
+
+            <input
+
+                id="ftdSound"
+
+                type="checkbox"
+
+            >
+
+            <label>
+
+                Sound
+
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <button
+        class="save-button"
+        onclick="saveSettings()"
+    >
+
+        💾 SAVE SETTINGS
+
+    </button>
+
+
+    <div id="message"></div>
+
+
+    <!-- =================================
+         MODIFY PANEL
+    ================================== -->
+
+
+    <div
+        id="modifyPanel"
+        class="card"
+    >
+
+        <h2>
+
+            ✏️ Modify Achievement
+
+        </h2>
+
+
+        <label>
+
+            Agent Name
+
+        </label>
+
+
+        <input
+            id="modifyName"
+            type="text"
+            placeholder="Agent name"
+        >
+
+
+        <label>
+
+            Achievement
+
+        </label>
+
+
+        <select id="modifyType">
+
+
+            <option value="Deposit">
+
+                💰 Deposit
+
+            </option>
+
+
+            <option value="First Time Deposit">
+
+                🏆 First Time Deposit
+
+            </option>
+
+
+        </select>
+
+
+        <label>
+
+            Deposit Amount ($)
+
+        </label>
+
+
+        <input
+            id="modifyAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Amount"
+        >
+
+
+        <button
+            class="modify-save"
+            onclick="saveModification()"
+        >
+
+            💾 SAVE CHANGES
+
+        </button>
+
+
+        <button
+            class="cancel-button"
+            onclick="cancelModification()"
+        >
+
+            CANCEL
+
+        </button>
+
+
+    </div>
+
+
+    <!-- =================================
+         HISTORY
+    ================================== -->
+
+
+    <h2 class="history-title">
+
+        📊 Achievement History
+
+    </h2>
+
+
+    <div id="historyList">
+
+        Loading...
+
+    </div>
+
+
+</div>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-client.js"></script>
+
+
+
+<script>
+    let currentModifyId = null;
+    let historyCache = [];
+    async function loadSettings() {
+        const { data, error } = await window.awSupabase.from('app_config').select('config').eq('id', 1).single();
+        if (error) throw error; const config = data.config;
+        document.getElementById('depositDuration').value = config.deposit.duration;
+        document.getElementById('depositConfetti').checked = config.deposit.confetti;
+        document.getElementById('depositSound').checked = config.deposit.sound;
+        document.getElementById('ftdDuration').value = config.first_time_deposit.duration;
+        document.getElementById('ftdConfetti').checked = config.first_time_deposit.confetti;
+        document.getElementById('ftdSound').checked = config.first_time_deposit.sound;
+    }
+
+    async function saveSettings() {
+        const config = {
+            deposit: { duration: Number(document.getElementById('depositDuration').value), confetti: document.getElementById('depositConfetti').checked, sound: document.getElementById('depositSound').checked },
+            first_time_deposit: { duration: Number(document.getElementById('ftdDuration').value), confetti: document.getElementById('ftdConfetti').checked, sound: document.getElementById('ftdSound').checked }
+        };
+        const { error } = await window.awSupabase.from('app_config').upsert({ id: 1, config, updated_at: new Date().toISOString() });
+        if (error) { document.getElementById('message').innerText = '❌ Could not save settings.'; console.error(error); return; }
+        await window.awBroadcast('config_updated', config);
+        document.getElementById('message').innerText = '✅ Settings saved successfully!';
+    }
+
+    async function loadHistory() {
+        const { data, error } = await window.awSupabase.from('achievements').select('*').order('created_at', { ascending: true });
+        if (error) { document.getElementById('historyList').innerHTML = "<div class='empty'>Unable to load history.</div>"; throw error; }
+        historyCache = data || []; displayHistory(historyCache);
+    }
+
+    function displayHistory(achievements) {
+        historyCache = achievements || []; const list = document.getElementById('historyList'); list.innerHTML = '';
+        if (!historyCache.length) { list.innerHTML = "<div class='empty'>No achievements yet.</div>"; return; }
+        historyCache.slice().reverse().forEach(x => {
+            const item = document.createElement('div'); item.className = 'history-item';
+            const amountHTML = x.amount && Number(x.amount) > 0 ? `<div class="history-amount">💵 $${Number(x.amount).toLocaleString('en-US')}</div>` : '';
+            item.innerHTML = `<div class="history-name">${escapeHTML(x.name)}</div><div class="history-type">${escapeHTML(x.achievement)}</div>${amountHTML}<div class="history-actions"><button class="modify-button" onclick="openModify('${x.id}')">✏️ Modify</button><button class="delete-button" onclick="deleteAchievement('${x.id}')">🗑️ Delete</button></div>`;
+            list.appendChild(item);
+        });
+    }
+
+    async function stopCelebration() { try { await window.awBroadcast('stop_celebration', {}); document.getElementById('stopMessage').innerText = '🛑 Stop command sent to the wall.'; } catch (e) { console.error(e); document.getElementById('stopMessage').innerText = '❌ Could not contact the wall.'; } }
+
+    function openModify(id) {
+        const x = historyCache.find(v => v.id === id); if (!x) return alert('Achievement not found.'); currentModifyId = id;
+        document.getElementById('modifyName').value = x.name; document.getElementById('modifyType').value = x.achievement; document.getElementById('modifyAmount').value = x.amount || 0; document.getElementById('modifyPanel').style.display = 'block'; document.getElementById('modifyPanel').scrollIntoView({behavior:'smooth'});
+    }
+
+    async function saveModification() {
+        if (!currentModifyId) return; const name = document.getElementById('modifyName').value.trim(); const type = document.getElementById('modifyType').value; const amount = Number(document.getElementById('modifyAmount').value) || 0;
+        if (!name) return alert('Please enter the agent name.');
+        const { error } = await window.awSupabase.from('achievements').update({ name, achievement:type, amount }).eq('id', currentModifyId); if (error) { alert('Could not modify achievement.'); console.error(error); return; } await window.awBroadcast('history_updated', {});
+        currentModifyId = null; document.getElementById('modifyPanel').style.display='none'; loadHistory();
+    }
+
+    function cancelModification() { currentModifyId = null; document.getElementById('modifyPanel').style.display='none'; }
+
+    async function deleteAchievement(id) {
+        if (!confirm('Are you sure you want to delete this achievement?')) return;
+        const { error } = await window.awSupabase.from('achievements').delete().eq('id', id); if (error) { alert('Could not delete achievement.'); console.error(error); return; } await window.awBroadcast('history_updated', {}); loadHistory();
+    }
+
+    function escapeHTML(text) { const div=document.createElement('div'); div.textContent=text ?? ''; return div.innerHTML; }
+
+    async function init() {
+        try {
+            await window.awAuthReady; await loadSettings(); await loadHistory();
+            const channel = await window.awGetChannel(); channel.subscribe(status => {
+                const el = document.getElementById('connectionStatus'); if (el) { el.innerText = status === 'SUBSCRIBED' ? 'Connected to cloud' : status; el.className = status === 'SUBSCRIBED' ? 'connected' : 'disconnected'; }
+            });
+            window.awSupabase.channel('achievement-wall-admin-db', { config: { private: true } }).on('postgres_changes', {event:'*', schema:'public', table:'achievements'}, loadHistory).subscribe();
+        } catch(e) { console.error(e); alert('Supabase setup is not complete. Check the README.'); }
+    }
+    init();
+</script>
+
+
+</body>
+
+</html>

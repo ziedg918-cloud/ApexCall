@@ -1,0 +1,12 @@
+{
+    "deposit": {
+        "duration": 300,
+        "confetti": true,
+        "sound": false
+    },
+    "first_time_deposit": {
+        "duration": 300,
+        "confetti": true,
+        "sound": false
+    }
+}
