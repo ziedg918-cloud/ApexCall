@@ -1049,7 +1049,7 @@
 ></audio>
 
 <div id="soundUnlockBanner" onclick="unlockCelebrationAudio()">
-    🔊 Click anywhere to enable celebration sound
+    🔊🔔 Click anywhere to enable celebration sound &amp; desktop notifications
 </div>
 
 <div id="wall">
@@ -1509,6 +1509,17 @@ async function setupRealtime() {
 
         clearInterval(
             confettiTimer
+        );
+
+
+        /*
+        Fire a desktop notification right away so the agent's name is
+        visible even if this tab is covered by another window (e.g.
+        YouTube playing in front of the wall).
+        */
+
+        showDesktopNotification(
+            data
         );
 
 
@@ -2255,9 +2266,78 @@ async function setupRealtime() {
             }).catch(function () {});
         }
 
+        requestNotificationPermission();
+
         document.removeEventListener("click", unlockCelebrationAudio);
         document.removeEventListener("keydown", unlockCelebrationAudio);
         document.removeEventListener("touchstart", unlockCelebrationAudio);
+
+    }
+
+    /*
+    Desktop notifications so the agent's name is visible even when the
+    Wall PC's browser is showing a different window/tab (e.g. YouTube)
+    on top of wall.html. Notifications from the OS render above every
+    other window regardless of which one currently has focus.
+    */
+
+    function requestNotificationPermission() {
+
+        if (!("Notification" in window)) {
+            return;
+        }
+
+        if (Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+
+    }
+
+    function showDesktopNotification(data) {
+
+        if (!("Notification" in window)) {
+            return;
+        }
+
+        if (Notification.permission !== "granted") {
+            return;
+        }
+
+        const name = data.name || "Unknown";
+        const achievementLabel = data.achievement || "Achievement";
+
+        let body = achievementLabel;
+
+        if (Number(data.amount) > 0) {
+            body += " — $" + Number(data.amount).toLocaleString("en-US");
+        }
+
+        try {
+
+            const notification = new Notification(
+                "🎉 " + name,
+                {
+                    body: body,
+                    tag: "apexcall-celebration-" + Date.now(),
+                    requireInteraction: false
+                }
+            );
+
+            notification.onclick = function () {
+                window.focus();
+                notification.close();
+            };
+
+            setTimeout(
+                function () {
+                    notification.close();
+                },
+                10000
+            );
+
+        } catch (error) {
+            console.warn("Desktop notification failed:", error);
+        }
 
     }
 
