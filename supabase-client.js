@@ -55,4 +55,31 @@
         const channel = await window.awGetChannel();
         return channel.send({ type: 'broadcast', event, payload });
     };
+
+    /*
+    Real admin login (email/password), separate from the anonymous
+    session every page (including the public wall.html) gets by
+    default. Anonymous sessions can still READ data, but Row Level
+    Security on the database now requires a REAL (non-anonymous)
+    login for any write (create/edit/delete achievement, change
+    settings, manage agents/walls, or trigger a celebration).
+    */
+
+    window.awSignInAdmin = async function (email, password) {
+        const client = window.awSupabase;
+        const { data, error } = await client.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        await client.realtime.setAuth();
+        return data;
+    };
+
+    window.awSignOut = async function () {
+        await window.awSupabase.auth.signOut();
+    };
+
+    window.awIsRealAdmin = async function () {
+        const { data, error } = await window.awSupabase.auth.getUser();
+        if (error || !data || !data.user) return false;
+        return data.user.is_anonymous !== true;
+    };
 })();
