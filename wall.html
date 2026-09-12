@@ -1034,6 +1034,42 @@
             50% { opacity: 0.7; }
         }
 
+        #notifStatus {
+            position: fixed;
+            bottom: 14px;
+            right: 14px;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: sans-serif;
+            color: #fff;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.55);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        #notifStatus.state-default {
+            border-color: #ffcc00;
+        }
+
+        #notifStatus.state-granted {
+            border-color: #2ecc71;
+        }
+
+        #notifStatus.state-denied {
+            border-color: #e74c3c;
+        }
+
+        #notifStatus.state-unsupported {
+            border-color: #888;
+        }
+
     </style>
 
 </head>
@@ -1050,6 +1086,10 @@
 
 <div id="soundUnlockBanner" onclick="unlockCelebrationAudio()">
     🔊🔔 Click anywhere to enable celebration sound &amp; desktop notifications
+</div>
+
+<div id="notifStatus" onclick="handleNotifStatusClick()">
+    🔔 <span id="notifStatusLabel">Notifications: checking…</span>
 </div>
 
 <div id="wall">
@@ -2252,6 +2292,25 @@ async function setupRealtime() {
         }
     }
 
+    /*
+    Desktop notifications so the agent's name is visible even when the
+    Wall PC's browser is showing a different window/tab (e.g. YouTube)
+    on top of wall.html. Notifications from the OS render above every
+    other window regardless of which one currently has focus.
+
+    IMPORTANT real-world gotcha: even when Notification.permission is
+    "granted" in Chrome, Windows itself can still silently swallow the
+    notification if:
+      - Windows Settings > System > Notifications has Chrome turned
+        off, or
+      - "Focus Assist" / "Do Not Disturb" is turned on.
+    The little badge in the bottom-right corner below lets you check
+    the current status and fire a test notification at any time,
+    without waiting for a real deposit.
+    */
+
+    const NOTIF_LOG_PREFIX = "[ApexCall notifications]";
+
     function unlockCelebrationAudio() {
 
         const baseSound = document.getElementById(
@@ -2263,7 +2322,9 @@ async function setupRealtime() {
                 baseSound.pause();
                 baseSound.currentTime = 0;
                 hideSoundUnlockBanner();
-            }).catch(function () {});
+            }).catch(function (error) {
+                console.warn(NOTIF_LOG_PREFIX, "audio unlock failed:", error);
+            });
         }
 
         requestNotificationPermission();
@@ -2274,41 +2335,47 @@ async function setupRealtime() {
 
     }
 
-    /*
-    Desktop notifications so the agent's name is visible even when the
-    Wall PC's browser is showing a different window/tab (e.g. YouTube)
-    on top of wall.html. Notifications from the OS render above every
-    other window regardless of which one currently has focus.
-    */
-
     function requestNotificationPermission() {
 
         if (!("Notification" in window)) {
+            console.warn(NOTIF_LOG_PREFIX, "Notification API not supported in this browser.");
+            updateNotifStatusUI();
             return;
         }
 
+        console.log(NOTIF_LOG_PREFIX, "current permission before request:", Notification.permission);
+
         if (Notification.permission === "default") {
-            Notification.requestPermission();
+            Notification.requestPermission().then(function (result) {
+                console.log(NOTIF_LOG_PREFIX, "permission result:", result);
+                updateNotifStatusUI();
+            });
+        } else {
+            updateNotifStatusUI();
         }
 
     }
 
     function showDesktopNotification(data) {
 
+        console.log(NOTIF_LOG_PREFIX, "showDesktopNotification called with:", data);
+
         if (!("Notification" in window)) {
+            console.warn(NOTIF_LOG_PREFIX, "skipped: Notification API not supported.");
             return;
         }
 
         if (Notification.permission !== "granted") {
+            console.warn(NOTIF_LOG_PREFIX, "skipped: permission is", Notification.permission, "— click the bottom-right badge to enable.");
             return;
         }
 
-        const name = data.name || "Unknown";
-        const achievementLabel = data.achievement || "Achievement";
+        const name = (data && data.name) || "Unknown";
+        const achievementLabel = (data && data.achievement) || "Achievement";
 
         let body = achievementLabel;
 
-        if (Number(data.amount) > 0) {
+        if (data && Number(data.amount) > 0) {
             body += " — $" + Number(data.amount).toLocaleString("en-US");
         }
 
@@ -2328,6 +2395,14 @@ async function setupRealtime() {
                 notification.close();
             };
 
+            notification.onshow = function () {
+                console.log(NOTIF_LOG_PREFIX, "notification shown successfully.");
+            };
+
+            notification.onerror = function (error) {
+                console.error(NOTIF_LOG_PREFIX, "notification error:", error);
+            };
+
             setTimeout(
                 function () {
                     notification.close();
@@ -2336,14 +2411,102 @@ async function setupRealtime() {
             );
 
         } catch (error) {
-            console.warn("Desktop notification failed:", error);
+            console.error(NOTIF_LOG_PREFIX, "failed to create notification:", error);
         }
+
+    }
+
+    /*
+    Bottom-right status badge: shows current permission state at a
+    glance, and doubles as a manual test button so you can verify
+    real OS-level delivery without waiting for a live deposit.
+    */
+
+    function updateNotifStatusUI() {
+
+        const el = document.getElementById("notifStatus");
+        const label = document.getElementById("notifStatusLabel");
+
+        if (!el || !label) {
+            return;
+        }
+
+        el.classList.remove("state-default", "state-granted", "state-denied", "state-unsupported");
+
+        if (!("Notification" in window)) {
+            el.classList.add("state-unsupported");
+            label.textContent = "Notifications: not supported — click for info";
+            return;
+        }
+
+        if (Notification.permission === "granted") {
+            el.classList.add("state-granted");
+            label.textContent = "Notifications: ON — click to test";
+        } else if (Notification.permission === "denied") {
+            el.classList.add("state-denied");
+            label.textContent = "Notifications: BLOCKED — click for fix";
+        } else {
+            el.classList.add("state-default");
+            label.textContent = "Notifications: click to enable";
+        }
+
+    }
+
+    function handleNotifStatusClick() {
+
+        if (!("Notification" in window)) {
+            alert(
+                "This browser does not support desktop notifications.\n\n" +
+                "Use a recent version of Chrome or Edge."
+            );
+            return;
+        }
+
+        if (Notification.permission === "granted") {
+            // Fire a real test notification so you can confirm it actually
+            // appears on screen, even over YouTube / other windows.
+            showDesktopNotification({
+                name: "Test Agent",
+                achievement: "Test Notification",
+                amount: 100
+            });
+            return;
+        }
+
+        if (Notification.permission === "denied") {
+            alert(
+                "Desktop notifications are BLOCKED for this page.\n\n" +
+                "To fix it:\n" +
+                "1. Click the padlock/info icon in Chrome's address bar.\n" +
+                "2. Find \"Notifications\" and set it to \"Allow\".\n" +
+                "3. Reload this page.\n\n" +
+                "If it's already set to Allow and you still see nothing, " +
+                "check Windows Settings > System > Notifications to make " +
+                "sure Chrome is allowed to show notifications, and that " +
+                "Focus Assist / Do Not Disturb is turned off."
+            );
+            return;
+        }
+
+        Notification.requestPermission().then(function (result) {
+            console.log(NOTIF_LOG_PREFIX, "permission result from badge click:", result);
+            updateNotifStatusUI();
+            if (result === "granted") {
+                showDesktopNotification({
+                    name: "Test Agent",
+                    achievement: "Test Notification",
+                    amount: 100
+                });
+            }
+        });
 
     }
 
     document.addEventListener("click", unlockCelebrationAudio);
     document.addEventListener("keydown", unlockCelebrationAudio);
     document.addEventListener("touchstart", unlockCelebrationAudio);
+
+    updateNotifStatusUI();
 
 
     (async function () {
